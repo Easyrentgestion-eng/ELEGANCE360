@@ -1531,7 +1531,7 @@ function generateOrderPDF(order, autoDownload) {
     doc.text('N°: ' + order.ref, 14, 28);
     doc.text('Date: ' + new Date(order.date).toLocaleDateString('fr-FR'), 14, 34);
     doc.text('Fournisseur: ' + order.supplierName, 14, 40);
-    doc.text('Client: ' + company, 14, 46);
+    doc.text('Client: RAMZI BEN SALEH', 14, 46);
     doc.setDrawColor(200);
     doc.line(14, 50, 196, 50);
 
