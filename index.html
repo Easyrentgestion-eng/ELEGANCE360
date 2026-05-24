@@ -1605,6 +1605,19 @@ function generateOrderPDF(order, autoDownload) {
     doc.setFontSize(9);
     doc.text('Généré par Elegance 360', 14, finalY + 8);
 
+    // Signature
+    var sigY = finalY + 8;
+    doc.setDrawColor(180);
+    doc.line(140, sigY, 196, sigY);
+    sigY += 4;
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text('Signé par :', 140, sigY);
+    doc.setFont(undefined, 'normal');
+    doc.text('RAMZI BEN SALEH', 140, sigY + 5);
+    doc.text('2, rue Sidi Jbeli, ARIANA', 140, sigY + 10);
+    doc.text('Matricule Fiscal : 843575/Z', 140, sigY + 15);
+
     // Store PDF as base64 in the order for later viewing
     order.pdfData = doc.output('datauristring');
     // Also store product names map at time of order
