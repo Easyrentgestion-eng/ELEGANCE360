@@ -1523,18 +1523,48 @@ function generateOrderPDF(order, autoDownload) {
   try {
     var doc = new jspdf.jsPDF({ unit: 'mm', format: 'a4' });
     var pm = productMap();
-    var company = state.settings.companyName || 'Mon entreprise';
 
-    doc.setFontSize(16);
-    doc.text('BON DE COMMANDE', 14, 20);
-    doc.setFontSize(10);
-    doc.text('N°: ' + order.ref, 14, 28);
-    doc.text('Date: ' + new Date(order.date).toLocaleDateString('fr-FR'), 14, 34);
-    doc.text('Fournisseur: ' + order.supplierName, 14, 40);
-    doc.text('Client: RAMZI BEN SALEH', 14, 46);
+    // Header bar
+    doc.setFillColor(0, 65, 133);
+    doc.rect(0, 0, 210, 32, 'F');
+    doc.setTextColor(255);
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text('BON DE COMMANDE', 14, 14);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text('ELEGANCE 360 — Gestion commandes', 14, 22);
+    doc.setFontSize(7);
+    doc.text('Document officiel', 14, 27);
+    doc.setTextColor(0);
+
+    // Info block
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text('RÉFÉRENCE', 14, 44);
+    doc.setFont(undefined, 'normal');
+    doc.text(order.ref, 14, 49);
+    doc.setFont(undefined, 'bold');
+    doc.text('DATE', 80, 44);
+    doc.setFont(undefined, 'normal');
+    doc.text(new Date(order.date).toLocaleDateString('fr-FR'), 80, 49);
+    doc.setFont(undefined, 'bold');
+    doc.text('FOURNISSEUR', 130, 44);
+    doc.setFont(undefined, 'normal');
+    doc.text(order.supplierName, 130, 49);
+    doc.setFont(undefined, 'bold');
+    doc.text('CLIENT', 14, 60);
+    doc.setFont(undefined, 'normal');
+    doc.text('RAMZI BEN SALEH', 14, 65);
+    doc.text('2, rue Sidi Jbeli, ARIANA', 14, 70);
+    doc.text('Matricule Fiscal : 843575/Z', 14, 75);
+
+    // Thin separator
     doc.setDrawColor(200);
-    doc.line(14, 50, 196, 50);
+    doc.setLineWidth(0.3);
+    doc.line(14, 82, 196, 82);
 
+    // Items table
     var rows = [];
     for (var i=0; i<order.items.length; i++) {
       var item = order.items[i];
@@ -1548,28 +1578,32 @@ function generateOrderPDF(order, autoDownload) {
     }
 
     doc.autoTable({
-      startY: 54,
+      startY: 86,
       head: [['Produit', 'Marque', 'Qté', 'Répartition']],
       body: rows,
-      styles: { fontSize: 9, cellPadding: 3 },
-      headStyles: { fillColor: [37, 99, 235], textColor: 255 },
-      alternateRowStyles: { fillColor: [248, 250, 252] }
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [0, 107, 184], textColor: 255, fontSize: 8, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: 30 }, 2: { cellWidth: 15, halign: 'center' } }
     });
 
-    var finalY = doc.lastAutoTable.finalY + 10;
+    var finalY = doc.lastAutoTable.finalY + 8;
     doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
     doc.text('Total articles: ' + order.total, 14, finalY);
+    doc.setFont(undefined, 'normal');
 
-    // Statut / réception
-    var statusY = finalY + 6;
+    // Status / reception
+    var statusY = finalY + 8;
     if (order.received) {
-      doc.setFontSize(11);
+      doc.setFontSize(10);
       doc.setTextColor(22, 163, 74);
+      doc.setFont(undefined, 'bold');
       doc.text('✓ COMMANDE REÇUE — ' + new Date(order.receivedDate).toLocaleDateString('fr-FR'), 14, statusY);
+      doc.setFont(undefined, 'normal');
       doc.setTextColor(0);
-      doc.setFontSize(9);
+      doc.setFontSize(8);
 
-      // Inventaire de réception
       var invRows = order.items.map(function(it) {
         var p2 = pm[it.productId];
         var allocStr = '';
@@ -1579,44 +1613,59 @@ function generateOrderPDF(order, autoDownload) {
         }
         return [esc(p2 ? p2.name : it.productId), it.qty, esc(allocStr || '—')];
       });
-      doc.text('Inventaire de réception:', 14, statusY + 10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Inventaire de réception', 14, statusY + 8);
+      doc.setFont(undefined, 'normal');
       doc.autoTable({
-        startY: statusY + 14,
+        startY: statusY + 11,
         head: [['Produit', 'Reçu', 'Répartition']],
         body: invRows,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [22, 163, 74], textColor: 255 }
+        styles: { fontSize: 7.5, cellPadding: 2 },
+        headStyles: { fillColor: [22, 163, 74], textColor: 255, fontSize: 7.5, fontStyle: 'bold' },
+        columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: 15, halign: 'center' } }
       });
       finalY = doc.lastAutoTable.finalY + 10;
 
       // Stamp
+      doc.setFillColor(22, 163, 74);
+      doc.rect(155, 8, 42, 18, 'F');
+      doc.setTextColor(255);
       doc.setFontSize(10);
-      doc.setTextColor(22, 163, 74);
-      doc.setDrawColor(22, 163, 74);
-      doc.setLineWidth(0.5);
-      doc.rect(155, 14, 40, 16);
-      doc.text('REÇUE', 175, 24, { align: 'center' });
+      doc.setFont(undefined, 'bold');
+      doc.text('REÇUE', 176, 20, { align: 'center' });
       doc.setTextColor(0);
+      doc.setFont(undefined, 'normal');
     } else {
-      doc.text('Statut: En attente de réception', 14, statusY);
+      doc.setFontSize(8);
+      doc.setTextColor(180);
+      doc.text('Statut : En attente de réception', 14, statusY);
+      doc.setTextColor(0);
       finalY = statusY + 10;
     }
 
-    doc.setFontSize(9);
-    doc.text('Généré par Elegance 360', 14, finalY + 8);
-
-    // Signature
-    var sigY = finalY + 8;
+    // Signature block (bottom right)
+    var sigX = 120;
+    var sigY = Math.max(finalY + 6, 260);
     doc.setDrawColor(180);
-    doc.line(140, sigY, 196, sigY);
-    sigY += 4;
-    doc.setFontSize(8);
+    doc.setLineWidth(0.5);
+    doc.line(sigX, sigY, 196, sigY);
+    doc.setFontSize(7);
+    doc.setTextColor(150);
+    doc.text('Cachet & signature', sigX, sigY + 3);
     doc.setFont(undefined, 'bold');
-    doc.text('Signé par :', 140, sigY);
+    doc.setFontSize(9);
+    doc.setTextColor(0);
+    doc.text('RAMZI BEN SALEH', sigX, sigY + 9);
     doc.setFont(undefined, 'normal');
-    doc.text('RAMZI BEN SALEH', 140, sigY + 5);
-    doc.text('2, rue Sidi Jbeli, ARIANA', 140, sigY + 10);
-    doc.text('Matricule Fiscal : 843575/Z', 140, sigY + 15);
+    doc.setFontSize(7.5);
+    doc.text('2, rue Sidi Jbeli, ARIANA', sigX, sigY + 14);
+    doc.text('Matricule Fiscal : 843575/Z', sigX, sigY + 18.5);
+
+    // Footer
+    doc.setFontSize(7);
+    doc.setTextColor(180);
+    doc.text('Généré par ELEGANCE 360', 14, 290);
+    doc.text('Page 1', 196, 290, { align: 'right' });
 
     // Store PDF as base64 in the order for later viewing
     order.pdfData = doc.output('datauristring');
