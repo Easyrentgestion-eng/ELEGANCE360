@@ -427,6 +427,10 @@ table input[type=number]:focus{border-color:var(--accent);box-shadow:0 0 0 2px v
 <div class="toast" id="toast"></div>
 
 <script>
+var COMPANY_NAME = 'RAMZI BEN SALEH';
+var COMPANY_ADDR = '2, rue Sidi Jbeli, ARIANA';
+var COMPANY_FISCAL = 'Matricule Fiscal : 843575/Z';
+
 var STORES = [
   {id:'manouba', name:'MANOUBA'},{id:'sprolls', name:'SPROLLS'},{id:'ariana', name:'ARIANA'}
 ];
@@ -1555,9 +1559,9 @@ function generateOrderPDF(order, autoDownload) {
     doc.setFont(undefined, 'bold');
     doc.text('CLIENT', 14, 60);
     doc.setFont(undefined, 'normal');
-    doc.text('RAMZI BEN SALEH', 14, 65);
-    doc.text('2, rue Sidi Jbeli, ARIANA', 14, 70);
-    doc.text('Matricule Fiscal : 843575/Z', 14, 75);
+    doc.text(COMPANY_NAME, 14, 65);
+    doc.text(COMPANY_ADDR, 14, 70);
+    doc.text(COMPANY_FISCAL, 14, 75);
 
     // Thin separator
     doc.setDrawColor(200);
@@ -1655,11 +1659,11 @@ function generateOrderPDF(order, autoDownload) {
     doc.setFont(undefined, 'bold');
     doc.setFontSize(9);
     doc.setTextColor(0);
-    doc.text('RAMZI BEN SALEH', sigX, sigY + 9);
+    doc.text(COMPANY_NAME, sigX, sigY + 9);
     doc.setFont(undefined, 'normal');
     doc.setFontSize(7.5);
-    doc.text('2, rue Sidi Jbeli, ARIANA', sigX, sigY + 14);
-    doc.text('Matricule Fiscal : 843575/Z', sigX, sigY + 18.5);
+    doc.text(COMPANY_ADDR, sigX, sigY + 14);
+    doc.text(COMPANY_FISCAL, sigX, sigY + 18.5);
 
     // Footer
     doc.setFontSize(7);
