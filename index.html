@@ -1111,13 +1111,6 @@ function renderOrderCreate() {
     summaryEl.innerHTML = '';
   }
 
-  var stockMap = {};
-  for (var i=0; i<state.stock.length; i++) {
-    var s = state.stock[i];
-    if (!stockMap[s.productId]) stockMap[s.productId] = {};
-    stockMap[s.productId][s.storeId] = s.qty;
-  }
-
   if (list.length === 0) {
     document.getElementById('order-body').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">'+(sup?'Aucun produit pour cette marque.':'Sélectionnez d\'abord un fournisseur.')+'</td></tr>';
     return;
@@ -1126,19 +1119,13 @@ function renderOrderCreate() {
   var rows = '';
   for (var i=0; i<list.length; i++) {
     var p = list[i];
-    var storeQtys = [], totalStk = 0;
-    for (var j=0; j<STORES.length; j++) {
-      var qty = stockMap[p.id] ? (stockMap[p.id][STORES[j].id]||0) : 0;
-      storeQtys.push(qty);
-      totalStk += qty;
-    }
-    var orderQty = orderItems[p.id] || 0;
     var chips = '';
-    for (var j=0; j<STORES.length; j++) chips += '<span class="store-chip" style="margin-right:2px">'+STORES[j].name.substring(0,3)+':'+storeQtys[j]+'</span>';
+    for (var j=0; j<STORES.length; j++) chips += '<span class="store-chip" style="margin-right:2px">'+STORES[j].name.substring(0,3)+':0</span>';
     var allocs = '';
     for (var j=0; j<STORES.length; j++) allocs += '<input type="number" class="order-alloc" data-pid="'+p.id+'" data-store="'+STORES[j].id+'" value="0" min="0" style="width:38px;margin-right:2px;padding:.15rem;border:1px solid var(--border);border-radius:3px;font-size:.7rem;background:var(--bg);color:var(--text);text-align:center;outline:0" onchange="syncOrderFromAlloc(this)">';
+    var orderQty = orderItems[p.id] || 0;
     rows += '<tr><td><strong>'+esc(p.name)+'</strong></td>' +
-      '<td>'+chips+'</td><td style="font-weight:600">'+fmtNum(totalStk)+'</td>' +
+      '<td>'+chips+'</td><td style="font-weight:600">0</td>' +
       '<td><input type="number" class="order-qty" data-pid="'+p.id+'" value="'+(orderQty||'')+'" min="0" style="width:55px;padding:.25rem;border:1px solid var(--border);border-radius:3px;font-size:.8rem;background:var(--bg);color:var(--text);text-align:center;outline:0" oninput="updateOrderQty(this)"></td>' +
       '<td>'+allocs+'</td><td style="font-weight:600" class="order-subtotal">'+fmtNum(orderQty)+'</td></tr>';
   }
@@ -1303,7 +1290,7 @@ function createOrder() {
 
   // Show PDF preview modal
   loadPDFLib(function() { showOrderPDFPreview(order); });
-  switchOrderTab('pending');
+  switchOrderTab('create');
 
   toast('Commande ' + ref + ' créée', 'success');
 }
